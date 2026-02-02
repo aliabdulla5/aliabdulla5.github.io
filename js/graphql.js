@@ -34,12 +34,33 @@ async function graphqlRequest(query, variables = {}) {
 
   // Handle HTTP errors
   if (!response.ok) {
+    // Token expired or invalid - clear auth and redirect to login
+    if (response.status === 401 || response.status === 403) {
+      localStorage.removeItem("jwt");
+      localStorage.removeItem("lastArea");
+      location.replace("index.html");
+      throw new Error("Session expired. Please login again.");
+    }
+    
     const message = data?.errors?.map(e => e.message).join("; ") || `HTTP ${response.status}`;
     throw new Error(message);
   }
 
-  // Handle GraphQL errors
+  // Handle GraphQL errors (check for auth-related errors)
   if (data?.errors?.length) {
+    const authError = data.errors.some(e => 
+      e.message?.toLowerCase().includes("denied") ||
+      e.message?.toLowerCase().includes("unauthorized") ||
+      e.message?.toLowerCase().includes("invalid") ||
+      e.extensions?.code === "invalid-jwt"
+    );
+    
+    if (authError) {
+      localStorage.removeItem("jwt");
+      localStorage.removeItem("lastArea");
+      location.replace("index.html");
+    }
+    
     throw new Error(data.errors.map(e => e.message).join("; "));
   }
 

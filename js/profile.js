@@ -6,9 +6,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadProfile() {
   try {
+    // Validate token before making any requests
+    const token = localStorage.getItem("jwt");
+    if (!token) {
+      location.replace("index.html");
+      return;
+    }
+    
     const uid = await getUserId();
     if (!uid) {
       showError("Not authenticated");
+      // Token exists but can't get user ID - likely invalid
+      localStorage.removeItem("jwt");
+      localStorage.removeItem("lastArea");
+      setTimeout(() => location.replace("index.html"), 1000);
       return;
     }
 

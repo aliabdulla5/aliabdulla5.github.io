@@ -6,10 +6,44 @@
 const DOMAIN = "https://learn.reboot01.com";
 const TOKEN_KEY = "jwt";
 
-// Redirect to login if not authenticated on profile page
+/**
+ * Validate JWT token expiration and structure
+ * Returns true if token is valid and not expired
+ */
+function isTokenValid() {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) return false;
+  
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    
+    // Check expiration (exp is in seconds, Date.now() is in milliseconds)
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      return false; // Token expired
+    }
+    
+    return true;
+  } catch (e) {
+    return false; // Malformed token
+  }
+}
+
+/**
+ * Clear invalid auth state and redirect to login
+ */
+function clearAuthAndRedirect() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem("lastArea");
+  location.replace("index.html"); // Replace history to prevent back button loop
+}
+
+// Validate token before loading protected pages
 if (location.pathname.includes("profile")) {
-  if (!localStorage.getItem(TOKEN_KEY)) {
-    location.href = "index.html";
+  if (!isTokenValid()) {
+    clearAuthAndRedirect();
   }
 }
 
@@ -48,7 +82,8 @@ if (form) {
       const data = await res.json();
       const tokenValue = data.token || data.jwt || data.accessToken || data;
       localStorage.setItem(TOKEN_KEY, tokenValue);
-      location.href = "profile.html";
+      // Replace history so back button doesn't return to login
+      location.replace("profile.html");
       
     } catch (err) {
       if (errorEl) errorEl.textContent = err.message || "Login failed";
