@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profile | GraphQL</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="/favicon.ico" />
+</head>
+<body class="area-overworld">
+
+  <div id="root-scroll-wrapper">
+  <!-- Fixed Top Navigation Bar -->
+  <nav class="topbar">
+    <div class="topbar-inner">
+      <header class="site-header">
+        <div>
+          <h1 id="welcomeName">My Profile</h1>
+          <span id="currentWorldName" class="note">Overworld</span>
+        </div>
+        <div class="header-controls">
+          <span id="headerUsername" class="note"></span>
+          <button onclick="logout()" aria-label="Log out">Logout</button>
+        </div>
+      </header>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <div class="container">
+
+    <!-- User Details Summary Bar -->
+    <section class="card" id="user-details" aria-label="User information">
+      <div id="userDetailsRow">
+        <div id="userName" class="note">Username: -</div>
+        <div id="userEmail" class="note">Email: -</div>
+        <div id="userCPR" class="note">CPR: -</div>
+      </div>
+    </section>
+
+    <!-- Main Panel Grid -->
+    <main class="main-panel">
+      
+      <!-- Stats Card: Level & Audit Ratio -->
+      <section class="card" id="user-info" aria-label="User statistics">
+        <h2>My Stats</h2>
+        <div class="card-inner">
+          <p class="note" id="sectionIntro">Your profile statistics</p>
+          
+          <div id="statsGrid" class="stats-grid">
+            <!-- Level Circle -->
+            <div id="levelBlock" class="level-block">
+              <svg id="levelCircle" viewBox="0 0 120 120" aria-label="Level indicator"></svg>
+              <div id="levelLabel" class="note">Level</div>
+            </div>
+
+            <!-- Audit Ratio Block -->
+            <div id="auditBlock" class="audit-block">
+              <div class="audit-row">
+                <span id="auditDescriptor" class="note">Audit ratio</span>
+                <span id="auditRatioText" class="note">-</span>
+              </div>
+              <div id="auditBar" class="audit-bar" role="progressbar" aria-label="Audit progress">
+                <div id="auditDone" class="audit-done"></div>
+                <div id="auditReceived" class="audit-received"></div>
+              </div>
+              <div id="auditNumbers" class="audit-numbers note">
+                <span id="auditDoneNum">Done: -</span>
+                <span id="auditReceivedNum">Received: -</span>
+              </div>
+            </div>
+          </div>
+
+          <p id="errorMsg" class="error"></p>
+        </div>
+      </section>
+
+      <!-- XP Card (no projects list - projects are in Clouds) -->
+      <section class="card" id="xp-progress" aria-label="XP and progress">
+        <h2>XP & Progress</h2>
+        <div class="card-inner">
+          <div class="xp-row">
+            <div id="xpTotal" class="xp-total">-</div>
+            <span class="note">Total XP</span>
+          </div>
+          <div class="xp-row">
+            <div id="projectCount" class="note">-</div>
+            <span class="note">Projects Completed</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Statistics Summary Card -->
+      <section class="card" id="stats" aria-label="Statistics summary">
+        <h2>Statistics</h2>
+        <div class="card-inner">
+          <p class="note">View detailed skill graphs in the Underground area using the pipe below.</p>
+          <ul id="overworldList" class="list-scroll" aria-label="Quick stats"></ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Clouds Panel (Sky World - Projects + Timeline Graph) -->
+  <aside id="cloudsPanel" aria-label="Sky projects panel">
+    <section class="card">
+      <h2>☁️ Sky Projects</h2>
+      <div class="card-inner">
+        <div class="clouds-projects">
+          <p class="note">All completed projects</p>
+          <ul id="cloudProjectsList" aria-label="All projects"></ul>
+        </div>
+        <div class="clouds-graph">
+          <p class="note">Projects completed over time</p>
+          <svg id="projectsTimeline" role="img" aria-label="Projects timeline chart"></svg>
+        </div>
+      </div>
+    </section>
+  </aside>
+
+  <!-- Underground Panel (Skill Graphs) -->
+  <aside id="undergroundPanel" aria-label="Underground analytics panel">
+    <section class="card">
+      <h2>🏔️ Underground Analytics</h2>
+      <div class="card-inner">
+        <p class="note">Detailed skill breakdown visualized in radar charts.</p>
+        <div class="stat-row">
+          <svg id="skillsA" role="img" aria-label="Skills chart - Group A"></svg>
+          <svg id="skillsB" role="img" aria-label="Skills chart - Group B"></svg>
+        </div>
+      </div>
+    </section>
+  </aside>
+
+  <!-- Floating Navigation Buttons -->
+  <button id="cloudToTop" class="nav-btn" data-area="clouds" aria-label="View projects" onclick="goToArea('clouds')">
+    <img src="css/images/cloud.png" alt="Cloud" />
+    <span class="nav-label">Projects</span>
+  </button>
+  <button id="cloudToOver" class="nav-btn" data-area="overworld" aria-label="Return to profile" onclick="goToArea('overworld')">
+    <span class="nav-label">Profile</span>
+    <img src="css/images/cloud.png" alt="Cloud" />
+  </button>
+  <button id="pipeToUnd" class="nav-btn" data-area="underground" aria-label="View skills" onclick="goToArea('underground')">
+    <img src="css/images/pipe.png" alt="Pipe" />
+    <span class="nav-label">Skills</span>
+  </button>
+  <button id="pipeToOver" class="nav-btn" data-area="overworld" aria-label="Return to profile" onclick="goToArea('overworld')">
+    <span class="nav-label">Profile</span>
+    <img src="css/images/pipe.png" alt="Pipe" />
+  </button>
+
+  <!-- Toast Notification -->
+  <div id="marioToast" class="mario-toast" aria-hidden="true" role="status"></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/graphql.js"></script>
+  <script src="js/profile.js"></script>
+  </div>
+</body>
+</html>

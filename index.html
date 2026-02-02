@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login | GraphQL Profile</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="/favicon.ico" />
+</head>
+<body class="area-overworld">
+
+  <div class="login-wrapper">
+    <div class="login-box">
+      <!-- Mario-style title with coin icon -->
+      <h1>GraphQL</h1>
+      <p class="note">Enter your credentials to continue</p>
+
+      <form id="loginForm" autocomplete="on">
+        <input 
+          type="text" 
+          id="identifier" 
+          name="username"
+          placeholder="Username or Email" 
+          autocomplete="username"
+          required 
+        />
+        <input 
+          type="password" 
+          id="password" 
+          name="password"
+          placeholder="Password" 
+          autocomplete="current-password"
+          required 
+        />
+        <button type="submit">Start Game</button>
+      </form>
+
+      <p id="error" class="error" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>
