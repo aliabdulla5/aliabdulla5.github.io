@@ -202,14 +202,6 @@ function renderXPProgress(transactions, progresses) {
 
   setText("projectCount", entries.length.toString());
 
-  const overworldList = document.getElementById("overworldList");
-  if (overworldList) {
-    overworldList.innerHTML = "";
-    const totalXP = transactions.reduce((s, t) => s + (t.amount || 0), 0);
-    addListItem(overworldList, `Total XP: ${formatBytes(totalXP)}`);
-    addListItem(overworldList, `Projects: ${entries.length}`);
-  }
-
   const cloudList = document.getElementById("cloudProjectsList");
   if (cloudList) {
     cloudList.innerHTML = "";
@@ -256,6 +248,22 @@ function renderSkillGraphs(skillTx, progresses) {
 
   drawSkillsRadar(document.getElementById("skillsA"), skillData.slice(0, 6));
   drawSkillsRadar(document.getElementById("skillsB"), skillData.slice(6, 12));
+  
+  const undergroundList = document.getElementById("undergroundSkillsList");
+  if (undergroundList) {
+    undergroundList.innerHTML = "";
+    skillData.filter(s => s.value > 0).forEach(skill => {
+      const li = document.createElement("li");
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = skill.name;
+      const valueSpan = document.createElement("span");
+      valueSpan.className = "skill-value";
+      valueSpan.textContent = `${skill.value.toFixed(1)}%`;
+      li.appendChild(nameSpan);
+      li.appendChild(valueSpan);
+      undergroundList.appendChild(li);
+    });
+  }
 }
 
 function drawLevelCircle(svg, level) {
@@ -464,7 +472,7 @@ function drawProjectsTimeline(svg, entries) {
 }
 
 function initNavigation() {
-  document.querySelectorAll(".float-btn").forEach(btn => {
+  document.querySelectorAll(".nav-btn").forEach(btn => {
     const area = btn.dataset.area;
     if (area) {
       btn.addEventListener("click", (e) => {
@@ -481,6 +489,15 @@ function goToArea(area) {
   if (!validAreas.includes(area)) return;
 
   const currentArea = document.body.className.match(/area-(overworld|clouds|underground)/)?.[1];
+  
+  // Scroll reset - ensure every world opens at top
+  const rootScroll = document.getElementById("root-scroll-wrapper");
+  if (rootScroll) rootScroll.scrollTop = 0;
+  
+  const cloudsPanel = document.getElementById("cloudsPanel");
+  const undergroundPanel = document.getElementById("undergroundPanel");
+  if (cloudsPanel) cloudsPanel.scrollTop = 0;
+  if (undergroundPanel) undergroundPanel.scrollTop = 0;
   
   // Add transition class for themed animations
   if (area === "clouds" && currentArea !== "clouds") {

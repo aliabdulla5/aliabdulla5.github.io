@@ -90,15 +90,6 @@
         </div>
       </section>
 
-      <!-- Statistics Summary Card -->
-      <section class="card" id="stats" aria-label="Statistics summary">
-        <h2>Statistics</h2>
-        <div class="card-inner">
-          <p class="note">View detailed skill graphs in the Underground area using the pipe below.</p>
-          <ul id="overworldList" class="list-scroll" aria-label="Quick stats"></ul>
-        </div>
-      </section>
-
     </main>
   </div>
 
@@ -124,10 +115,16 @@
     <section class="card">
       <h2>🏔️ Underground Analytics</h2>
       <div class="card-inner">
-        <p class="note">Detailed skill breakdown visualized in radar charts.</p>
-        <div class="stat-row">
-          <svg id="skillsA" role="img" aria-label="Skills chart - Group A"></svg>
-          <svg id="skillsB" role="img" aria-label="Skills chart - Group B"></svg>
+        <div class="skills-list-section">
+          <p class="note">Top skills by highest percentage</p>
+          <ul id="undergroundSkillsList" class="list-scroll" aria-label="Skills list"></ul>
+        </div>
+        <div class="skills-graphs-section">
+          <p class="note">Detailed skill breakdown visualized in radar charts</p>
+          <div class="stat-row">
+            <svg id="skillsA" role="img" aria-label="Skills chart - Group A"></svg>
+            <svg id="skillsB" role="img" aria-label="Skills chart - Group B"></svg>
+          </div>
         </div>
       </div>
     </section>

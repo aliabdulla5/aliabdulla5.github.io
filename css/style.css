@@ -55,6 +55,18 @@ body::before {
   z-index: -1;
 }
 
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: -1;
+  pointer-events: none;
+}
+
 #root-scroll-wrapper {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 1rem;
@@ -64,6 +76,33 @@ body::before {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+body.area-overworld #root-scroll-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100%;
+}
+
+body.area-overworld .container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: calc(var(--topbar-height) + 40px);
+  padding-bottom: 40px;
+}
+
+#root-scroll-wrapper::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 500;
+  transition: opacity 0.4s ease;
 }
 
 h1, h2, h3 { font-weight: 600; line-height: 1.3; }
@@ -113,7 +152,7 @@ input:focus { outline: none; border-color: var(--mario-green); }
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   backdrop-filter: blur(8px);
   position: relative;
 }
@@ -127,8 +166,8 @@ input:focus { outline: none; border-color: var(--mario-green); }
   border-radius: 12px 12px 0 0;
 }
 
-.card h2 { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle); }
-.card-inner { display: flex; flex-direction: column; gap: 12px; }
+.card h2 { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle); }
+.card-inner { display: flex; flex-direction: column; gap: 16px; }
 
 .login-wrapper {
   min-height: 100vh;
@@ -184,8 +223,6 @@ input:focus { outline: none; border-color: var(--mario-green); }
 
 .login-box .error { text-align: center; margin-top: 12px; min-height: 20px; }
 
-body:has(.login-wrapper) .float-btn { display: none; }
-
 .topbar {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -213,10 +250,12 @@ body:has(.login-wrapper) .float-btn { display: none; }
 .header-controls { display: flex; align-items: center; gap: 12px; }
 #headerUsername { display: none; }
 
+/* Overworld has cloud button at top, pipe button at bottom */
 .container {
   padding: calc(var(--topbar-height) + var(--cloud-btn-space)) 20px var(--pipe-btn-space);
   max-width: var(--container-max);
   margin: 0 auto;
+  width: 100%;
   transition: opacity var(--transition-slide), transform var(--transition-slide);
 }
 
@@ -225,8 +264,8 @@ body:has(.login-wrapper) .float-btn { display: none; }
   align-items: center;
   justify-content: center;
   gap: 32px;
-  padding: 16px 24px;
-  margin-bottom: 20px;
+  padding: 20px 28px;
+  margin-bottom: 24px;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
@@ -253,13 +292,9 @@ body:has(.login-wrapper) .float-btn { display: none; }
 .main-panel {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 24px;
   transition: opacity var(--transition-slide), transform var(--transition-slide);
 }
-
-#user-info { grid-column: 1 / 2; }
-#xp-progress { grid-column: 2 / 3; }
-#stats { grid-column: 1 / -1; }
 
 .stats-grid {
   display: grid;
@@ -273,7 +308,7 @@ body:has(.login-wrapper) .float-btn { display: none; }
 #levelLabel { font-weight: 600; color: var(--text-secondary); }
 
 .audit-block { flex: 1; }
-.audit-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.audit-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
 
 .audit-bar {
   display: flex;
@@ -281,7 +316,7 @@ body:has(.login-wrapper) .float-btn { display: none; }
   border-radius: 10px;
   overflow: hidden;
   background: rgba(255,255,255,0.05);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .audit-done { background: linear-gradient(90deg, var(--mario-green), #5ed262); transition: width var(--transition-base); }
@@ -290,9 +325,13 @@ body:has(.login-wrapper) .float-btn { display: none; }
 
 .xp-row {
   text-align: center;
-  padding: 16px;
+  padding: 20px;
   background: rgba(255,255,255,0.02);
   border-radius: 10px;
+}
+
+.xp-row:not(:last-child) {
+  margin-bottom: 12px;
 }
 
 .xp-total {
@@ -322,17 +361,33 @@ body:has(.login-wrapper) .float-btn { display: none; }
 #overworldList { list-style: none; padding: 0; }
 #overworldList li { padding: 8px; border-bottom: 1px solid var(--border-subtle); }
 
+/* Clouds & Underground Panels - Unified scroll behavior matching Overworld
+   - Panels scroll at container level (like #root-scroll-wrapper in Overworld)
+   - Cards expand to natural height without flex constraints
+   - Lists have intentional scroll at 600px for space efficiency
+   - Each panel only reserves space for its actual navigation buttons */
 #cloudsPanel, #undergroundPanel {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: calc(var(--topbar-height) + var(--cloud-btn-space)) 24px var(--pipe-btn-space);
   z-index: 50;
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--transition-slide), transform var(--transition-slide);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Clouds: Only cloud button at bottom (return to overworld) */
+#cloudsPanel {
+  padding: var(--topbar-height) 24px calc(var(--cloud-btn-space) + 80px);
+}
+
+/* Underground: Pipe button at top (return to overworld), reduced bottom padding */
+#undergroundPanel {
+  padding: calc(var(--topbar-height) + var(--pipe-btn-space)) 24px 80px;
 }
 
 #cloudsPanel { transform: translateY(-100%); }
@@ -341,36 +396,69 @@ body:has(.login-wrapper) .float-btn { display: none; }
 #cloudsPanel .card, #undergroundPanel .card {
   width: 100%;
   max-width: 900px;
-  max-height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
   pointer-events: auto;
 }
 
 #cloudsPanel .card::before { background: linear-gradient(90deg, var(--mario-sky), #87ceeb); }
 #undergroundPanel .card::before { background: linear-gradient(90deg, var(--mario-brown), #8b5a2b); }
 
-#cloudsPanel .card-inner { flex: 1; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+#cloudsPanel .card-inner { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 24px; 
+  align-items: stretch; 
+}
+#undergroundPanel .card-inner { 
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 28px;
+  align-items: stretch;
+}
 
-.clouds-projects { overflow-y: auto; max-height: 50vh; }
+/* Shared list section structure */
+.clouds-projects,
+.skills-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-#cloudProjectsList {
+/* Shared scrollable list pattern - intentional scroll for long lists */
+#cloudProjectsList,
+#undergroundSkillsList {
   list-style: none;
   padding: 0;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+#cloudProjectsList {
   margin: 0;
 }
 
-#cloudProjectsList li {
+/* Shared list item styles for consistency */
+#cloudProjectsList li,
+#undergroundSkillsList li {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border-subtle);
+}
+
+#cloudProjectsList li {
   transition: background var(--transition-fast);
 }
 
 #cloudProjectsList li:hover { background: rgba(255,255,255,0.03); }
 
-.clouds-graph { display: flex; flex-direction: column; }
-#projectsTimeline { width: 100%; height: 260px; background: rgba(0,0,0,0.25); border-radius: 10px; }
+/* Shared graph container structure */
+.clouds-graph,
+.skills-graphs-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+#projectsTimeline { width: 100%; height: 260px; background: rgba(0,0,0,0.25); border-radius: 10px; flex-shrink: 0; }
 
 .stat-row {
   display: grid;
@@ -384,6 +472,30 @@ body:has(.login-wrapper) .float-btn { display: none; }
   height: 280px;
   background: rgba(0,0,0,0.2);
   border-radius: 10px;
+}
+
+#undergroundSkillsList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+#undergroundSkillsList li .skill-value {
+  font-weight: 600;
+  color: var(--mario-blue);
+  white-space: nowrap;
+}
+
+#undergroundSkillsList li span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+#undergroundSkillsList li:last-child {
+  border-bottom: none;
 }
 
 /* Floating Navigation Buttons - Fixed positioning with reserved space */
@@ -503,18 +615,8 @@ body.area-clouds { --bg-image: url("images/clouds.png"); }
 body.area-underground { --bg-image: url("images/underground.png"); }
 
 /* Transition overlay effects */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  z-index: 500;
-  transition: opacity 0.4s ease;
-}
-
 /* Cloud transition: upward movement with soft cloud overlay */
-body.transitioning-to-clouds::after {
+body.transitioning-to-clouds #root-scroll-wrapper::before {
   background: linear-gradient(to bottom, 
     rgba(92, 148, 252, 0) 0%,
     rgba(92, 148, 252, 0.3) 40%,
@@ -526,7 +628,7 @@ body.transitioning-to-clouds::after {
 }
 
 /* Pipe transition: downward movement with darkening effect */
-body.transitioning-to-underground::after {
+body.transitioning-to-underground #root-scroll-wrapper::before {
   background: radial-gradient(ellipse at center,
     rgba(10, 12, 24, 0) 0%,
     rgba(10, 12, 24, 0.5) 40%,
@@ -657,10 +759,14 @@ body.area-underground #undergroundPanel { opacity: 1; pointer-events: auto; tran
 
 @media (max-width: 900px) {
   .main-panel { grid-template-columns: 1fr; }
-  #user-info, #xp-progress, #stats { grid-column: 1 / -1; }
   .stat-row { grid-template-columns: 1fr; }
   #cloudsPanel .card-inner { grid-template-columns: 1fr; }
+  #undergroundPanel .card-inner { grid-template-columns: 1fr; }
+  
+  /* Consistent mobile order: graphs first, lists second */
   .clouds-graph { order: -1; }
+  .skills-graphs-section { order: -1; }
+  
   #projectsTimeline { height: 200px; }
   body { background-attachment: scroll; }
 }
@@ -668,33 +774,45 @@ body.area-underground #undergroundPanel { opacity: 1; pointer-events: auto; tran
 @media (max-width: 600px) {
   :root { 
     --topbar-height: 56px;
-    --cloud-btn-space: 180px;
-    --pipe-btn-space: 200px;
+    --cloud-btn-space: 160px;
+    --pipe-btn-space: 180px;
+  }
+  
+  body.area-overworld #root-scroll-wrapper {
+    display: block;
+  }
+  
+  body.area-overworld .container {
+    display: block;
+    padding-top: calc(var(--topbar-height) + 140px);
+    padding-bottom: 160px;
   }
   
   .topbar { padding: 0 12px; }
   .site-header h1 { font-size: 1.1rem; }
-  .container { padding: calc(var(--topbar-height) + 160px) 12px 180px; }
+  .container { padding: calc(var(--topbar-height) + 140px) 12px 160px; }
   
-  #user-details { flex-direction: column; gap: 8px; padding: 14px; }
-  #userDetailsRow { flex-direction: column; gap: 6px; text-align: center; }
+  #user-details { flex-direction: column; gap: 12px; padding: 18px; margin-bottom: 20px; }
+  #userDetailsRow { flex-direction: column; gap: 10px; text-align: center; }
   #userDetailsRow > div { font-size: 0.9rem; }
   
-  .card { padding: 16px; }
+  .card { padding: 20px; }
+  .main-panel { gap: 20px; }
   .stats-grid { grid-template-columns: 1fr; text-align: center; }
   #levelCircle { width: 90px; height: 90px; }
   .xp-total { font-size: 1.5rem; }
   
-  .cloud-btn { width: 90px; }
-  .cloud-btn img { width: 90px; height: 45px; }
-  .pipe-btn { width: 60px; }
-  .pipe-btn img { width: 60px; height: 60px; }
-  .float-btn .nav-label { font-size: 0.6rem; }
-  
   .stat-row svg { height: 220px; }
   #projectsTimeline { height: 200px; }
   
-  #cloudsPanel, #undergroundPanel { padding: 12px; }
+  /* Mobile: each panel only reserves space for its actual button */
+  #cloudsPanel { 
+    padding: var(--topbar-height) 12px calc(var(--cloud-btn-space) + 50px);
+  }
+  
+  #undergroundPanel { 
+    padding: calc(var(--topbar-height) + var(--pipe-btn-space)) 12px 50px;
+  }
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
