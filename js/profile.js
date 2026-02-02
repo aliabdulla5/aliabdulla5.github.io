@@ -242,6 +242,12 @@ function renderAuditRatio(ratio, up, down) {
 }
 
 function renderXPProgress(transactions, progresses) {
+  // Count projects individually from transaction records (no grouping)
+  // Each transaction represents a distinct project completion
+  const projectCount = transactions.length;
+  setText("projectCount", projectCount.toString());
+
+  // For display purposes, aggregate XP by project name (group for UI visualization)
   const xpByProject = {};
   transactions.forEach(t => {
     const parts = (t.path || "").split("/").filter(Boolean);
@@ -264,8 +270,6 @@ function renderXPProgress(transactions, progresses) {
     .filter(e => e.xp > 0)
     .sort((a, b) => b.finishedAt - a.finishedAt);
 
-  setText("projectCount", entries.length.toString());
-
   const cloudList = document.getElementById("cloudProjectsList");
   if (cloudList) {
     cloudList.innerHTML = "";
@@ -276,7 +280,7 @@ function renderXPProgress(transactions, progresses) {
     });
   }
 
-  drawProjectsTimeline(document.getElementById("projectsTimeline"), entries);
+  drawProjectsTimeline(document.getElementById("projectsTimeline"), transactions, progresses);
 }
 
 function renderSkillGraphs(skillTx, progresses) {
@@ -327,6 +331,14 @@ function renderSkillGraphs(skillTx, progresses) {
       li.appendChild(valueSpan);
       undergroundList.appendChild(li);
     });
+  }
+
+  // Display highest skill in Overworld stats
+  const topSkill = skillData.find(s => s.value > 0);
+  if (topSkill) {
+    setText("topSkillName", `${topSkill.name}: ${topSkill.value.toFixed(1)}%`);
+  } else {
+    setText("topSkillName", "-");
   }
 }
 
@@ -420,7 +432,7 @@ function drawSkillsRadar(svg, data) {
   svg.appendChild(center);
 }
 
-function drawProjectsTimeline(svg, entries) {
+function drawProjectsTimeline(svg, transactions, progresses) {
   if (!svg) return;
   svg.innerHTML = "";
   svg.setAttribute("viewBox", "0 0 400 220");
@@ -430,7 +442,7 @@ function drawProjectsTimeline(svg, entries) {
   const width = 400 - padding.left - padding.right;
   const height = 220 - padding.top - padding.bottom;
 
-  if (!entries.length) {
+  if (!transactions?.length) {
     const text = document.createElementNS(ns, "text");
     Object.entries({ x: 200, y: 110, fill: "#64748b", "text-anchor": "middle", "font-size": "14" })
       .forEach(([k, v]) => text.setAttribute(k, v));
@@ -439,7 +451,33 @@ function drawProjectsTimeline(svg, entries) {
     return;
   }
 
-  const sorted = [...entries].filter(e => e.finishedAt > 0).sort((a, b) => a.finishedAt - b.finishedAt);
+  // Build timeline from individual transactions (not grouped entries)
+  const sorted = transactions
+    .filter(t => {
+      // Find matching progress record for this transaction
+      const parts = (t.path || "").split("/").filter(Boolean);
+      const key = parts[parts.length - 1] || "unknown";
+      return progresses.some(p => {
+        const pparts = (p.path || "").split("/").filter(Boolean);
+        return pparts[pparts.length - 1] === key;
+      });
+    })
+    .map(t => {
+      // Find latest progress date for this transaction's project
+      const parts = (t.path || "").split("/").filter(Boolean);
+      const key = parts[parts.length - 1] || "unknown";
+      let finishedAt = 0;
+      progresses.forEach(p => {
+        const pparts = (p.path || "").split("/").filter(Boolean);
+        if (pparts[pparts.length - 1] === key) {
+          const dt = Date.parse(p.createdAt || "");
+          if (!isNaN(dt) && dt > finishedAt) finishedAt = dt;
+        }
+      });
+      return { finishedAt };
+    })
+    .sort((a, b) => a.finishedAt - b.finishedAt);
+
   if (!sorted.length) {
     const text = document.createElementNS(ns, "text");
     Object.entries({ x: 200, y: 110, fill: "#64748b", "text-anchor": "middle", "font-size": "14" })
@@ -449,6 +487,7 @@ function drawProjectsTimeline(svg, entries) {
     return;
   }
 
+  // Aggregate individual projects by month (for visualization)
   const monthData = {};
   sorted.forEach(e => {
     const d = new Date(e.finishedAt);
@@ -554,12 +593,12 @@ function goToArea(area) {
 
   const currentArea = document.body.className.match(/area-(overworld|clouds|underground)/)?.[1];
   
-  // Scroll reset - ensure every world opens at top
+  // Pre-reset scroll positions before transition
   const rootScroll = document.getElementById("root-scroll-wrapper");
-  if (rootScroll) rootScroll.scrollTop = 0;
-  
   const cloudsPanel = document.getElementById("cloudsPanel");
   const undergroundPanel = document.getElementById("undergroundPanel");
+  
+  if (rootScroll) rootScroll.scrollTop = 0;
   if (cloudsPanel) cloudsPanel.scrollTop = 0;
   if (undergroundPanel) undergroundPanel.scrollTop = 0;
   
@@ -574,6 +613,17 @@ function goToArea(area) {
 
   document.body.classList.remove("area-overworld", "area-clouds", "area-underground");
   document.body.classList.add(`area-${area}`);
+
+  // Additional scroll reset after transition starts to ensure visibility
+  requestAnimationFrame(() => {
+    if (area === "underground" && undergroundPanel) {
+      undergroundPanel.scrollTop = 0;
+    } else if (area === "clouds" && cloudsPanel) {
+      cloudsPanel.scrollTop = 0;
+    } else if (area === "overworld" && rootScroll) {
+      rootScroll.scrollTop = 0;
+    }
+  });
 
   updateWorldName(area);
 

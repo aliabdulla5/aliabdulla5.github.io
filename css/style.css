@@ -24,8 +24,8 @@
   --transition-slide: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   --bg-image: url("images/overworld.png");
   
-  /* Button space calculation with comfortable margins */
-  --cloud-btn-space: 140px;
+  /* Global spacing for cloud/pipe navigation - single source of truth */
+  --cloud-btn-space: 150px;
   --pipe-btn-space: 170px;
 }
 
@@ -82,17 +82,14 @@ body::after {
 body.area-overworld #root-scroll-wrapper {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  /* Removed justify-content: space-between - it prevented padding from working */
   min-height: 100%;
 }
 
 body.area-overworld .container {
-  flex: 1;
+  /* Overworld uses global .container padding - no additional spacing needed */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding-top: calc(var(--topbar-height) + 40px);
-  padding-bottom: 40px;
 }
 
 #root-scroll-wrapper::before {
@@ -334,6 +331,12 @@ input:focus { outline: none; border-color: var(--mario-green); }
   margin-bottom: 12px;
 }
 
+/* Compact styling for top skill stat in stats card */
+#user-info .xp-row {
+  padding: 12px 16px;
+  margin-top: 12px;
+}
+
 .xp-total {
   font-size: 2rem;
   font-weight: 700;
@@ -382,12 +385,14 @@ input:focus { outline: none; border-color: var(--mario-green); }
 
 /* Clouds: Only cloud button at bottom (return to overworld) */
 #cloudsPanel {
-  padding: var(--topbar-height) 24px calc(var(--cloud-btn-space) + 80px);
+  /* Uses global spacing variable directly */
+  padding: var(--topbar-height) 24px var(--cloud-btn-space);
 }
 
-/* Underground: Pipe button at top (return to overworld), reduced bottom padding */
+/* Underground: Pipe button at top (return to overworld) */
 #undergroundPanel {
-  padding: calc(var(--topbar-height) + var(--pipe-btn-space)) 24px 80px;
+  /* Uses global spacing variable directly */
+  padding: calc(var(--topbar-height) + var(--pipe-btn-space)) 24px 40px;
 }
 
 #cloudsPanel { transform: translateY(-100%); }
