@@ -44,7 +44,26 @@ function clearAuthAndRedirect() {
 if (location.pathname.includes("profile")) {
   if (!isTokenValid()) {
     clearAuthAndRedirect();
+    throw new Error("Unauthorized"); // Stop execution immediately
   }
+}
+
+// Handle bfcache restoration in deployed environments (GitHub Pages)
+// When user navigates back, page may restore from cache without re-running checks
+if (location.pathname.includes("profile")) {
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted && !isTokenValid()) {
+      // Page restored from bfcache but auth is invalid
+      clearAuthAndRedirect();
+    }
+  });
+  
+  // Re-validate on visibility change (tab focus)
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && !isTokenValid()) {
+      clearAuthAndRedirect();
+    }
+  });
 }
 
 // Login form handler
@@ -98,9 +117,13 @@ if (form) {
 
 /**
  * Log out the current user
+ * Uses location.replace to prevent back button access to protected pages
  */
 function logout() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem("lastArea");
-  location.href = "index.html";
+  
+  // Replace history entry so back button cannot restore profile page
+  // Critical for deployed environments where bfcache may restore pages
+  location.replace("index.html");
 }

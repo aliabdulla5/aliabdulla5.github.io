@@ -1,4 +1,57 @@
+// Re-validate auth on every render (handles bfcache restore in deployed environments)
+function enforceAuth() {
+  const token = localStorage.getItem("jwt");
+  if (!token) {
+    location.replace("index.html");
+    return false;
+  }
+  
+  // Validate token structure and expiration
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) throw new Error("Invalid token");
+    
+    const payload = JSON.parse(atob(parts[1]));
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem("jwt");
+      localStorage.removeItem("lastArea");
+      location.replace("index.html");
+      return false;
+    }
+  } catch (e) {
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("lastArea");
+    location.replace("index.html");
+    return false;
+  }
+  
+  return true;
+}
+
+// Enforce auth immediately before any DOM operations
+if (!enforceAuth()) {
+  throw new Error("Unauthorized"); // Stop execution
+}
+
+// Handle page restoration from bfcache (back button in deployed environment)
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) {
+    // Page restored from cache - re-validate auth
+    enforceAuth();
+  }
+});
+
+// Re-validate when tab becomes visible
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    enforceAuth();
+  }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
+  // Final auth check before loading profile
+  if (!enforceAuth()) return;
+  
   loadProfile();
   initNavigation();
   restoreLastArea();
