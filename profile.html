@@ -10,7 +10,6 @@
 <body class="area-overworld">
 
   <div id="root-scroll-wrapper">
-  <!-- Fixed Top Navigation Bar -->
   <nav class="topbar">
     <div class="topbar-inner">
       <header class="site-header">
@@ -26,10 +25,8 @@
     </div>
   </nav>
 
-  <!-- Main Content Container -->
   <div class="container">
 
-    <!-- User Details Summary Bar -->
     <section class="card" id="user-details" aria-label="User information">
       <div id="userDetailsRow">
         <div id="userName" class="note">Username: -</div>
@@ -38,27 +35,23 @@
       </div>
     </section>
 
-    <!-- Main Panel Grid -->
     <main class="main-panel">
       
-      <!-- Stats Card: Level & Audit Ratio -->
       <section class="card" id="user-info" aria-label="User statistics">
         <h2>My Stats</h2>
         <div class="card-inner">
           <p class="note" id="sectionIntro">Your profile statistics</p>
           
           <div id="statsGrid" class="stats-grid">
-            <!-- Level Circle -->
             <div id="levelBlock" class="level-block">
               <svg id="levelCircle" viewBox="0 0 120 120" aria-label="Level indicator"></svg>
               <div id="levelLabel" class="note">Level</div>
             </div>
 
-            <!-- Audit Ratio Block -->
             <div id="auditBlock" class="audit-block">
               <div class="audit-row">
                 <span id="auditDescriptor" class="note">Audit ratio</span>
-                <span id="auditRatioText" class="note">-</span>
+                <span id="auditRatioText" class="ratio-value"><span class="ratio-label">Ratio:</span> -</span>
               </div>
               <div id="auditBar" class="audit-bar" role="progressbar" aria-label="Audit progress">
                 <div id="auditDone" class="audit-done"></div>
@@ -71,7 +64,6 @@
             </div>
           </div>
 
-          <!-- Highest Skill Display -->
           <div class="xp-row">
             <div id="topSkillName" class="note">-</div>
             <span class="note">Top Skill</span>
@@ -81,7 +73,6 @@
         </div>
       </section>
 
-      <!-- XP Card (no projects list - projects are in Clouds) -->
       <section class="card" id="xp-progress" aria-label="XP and progress">
         <h2>XP & Progress</h2>
         <div class="card-inner">
@@ -99,7 +90,6 @@
     </main>
   </div>
 
-  <!-- Clouds Panel (Sky World - Projects + Timeline Graph) -->
   <aside id="cloudsPanel" aria-label="Sky projects panel">
     <section class="card">
       <h2>☁️ Sky Projects</h2>
@@ -116,7 +106,6 @@
     </section>
   </aside>
 
-  <!-- Underground Panel (Skill Graphs) -->
   <aside id="undergroundPanel" aria-label="Underground analytics panel">
     <section class="card">
       <h2>🏔️ Underground Analytics</h2>
@@ -136,7 +125,6 @@
     </section>
   </aside>
 
-  <!-- Floating Navigation Buttons -->
   <button id="cloudToTop" class="nav-btn" data-area="clouds" aria-label="View projects" onclick="goToArea('clouds')">
     <img src="css/images/cloud.png" alt="Cloud" />
     <span class="nav-label">Projects</span>
@@ -154,12 +142,9 @@
     <img src="css/images/pipe.png" alt="Pipe" />
   </button>
 
-  <!-- Toast Notification -->
   <div id="marioToast" class="mario-toast" aria-hidden="true" role="status"></div>
 
-  <script src="js/auth.js"></script>
-  <script src="js/graphql.js"></script>
-  <script src="js/profile.js"></script>
+  <script type="module" src="js/main.js"></script>
   </div>
 </body>
 </html>

@@ -24,7 +24,6 @@
   --transition-slide: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   --bg-image: url("images/overworld.png");
   
-  /* Global spacing for cloud/pipe navigation - single source of truth */
   --cloud-btn-space: 150px;
   --pipe-btn-space: 170px;
 }
@@ -82,12 +81,10 @@ body::after {
 body.area-overworld #root-scroll-wrapper {
   display: flex;
   flex-direction: column;
-  /* Removed justify-content: space-between - it prevented padding from working */
   min-height: 100%;
 }
 
 body.area-overworld .container {
-  /* Overworld uses global .container padding - no additional spacing needed */
   display: flex;
   flex-direction: column;
 }
@@ -247,7 +244,6 @@ input:focus { outline: none; border-color: var(--mario-green); }
 .header-controls { display: flex; align-items: center; gap: 12px; }
 #headerUsername { display: none; }
 
-/* Overworld has cloud button at top, pipe button at bottom */
 .container {
   padding: calc(var(--topbar-height) + var(--cloud-btn-space)) 20px var(--pipe-btn-space);
   max-width: var(--container-max);
@@ -307,6 +303,19 @@ input:focus { outline: none; border-color: var(--mario-green); }
 .audit-block { flex: 1; }
 .audit-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
 
+.ratio-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ratio-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-right: 6px;
+  color: var(--text-secondary);
+}
+
 .audit-bar {
   display: flex;
   height: 20px;
@@ -331,7 +340,6 @@ input:focus { outline: none; border-color: var(--mario-green); }
   margin-bottom: 12px;
 }
 
-/* Compact styling for top skill stat in stats card */
 #user-info .xp-row {
   padding: 12px 16px;
   margin-top: 12px;
@@ -364,11 +372,6 @@ input:focus { outline: none; border-color: var(--mario-green); }
 #overworldList { list-style: none; padding: 0; }
 #overworldList li { padding: 8px; border-bottom: 1px solid var(--border-subtle); }
 
-/* Clouds & Underground Panels - Unified scroll behavior matching Overworld
-   - Panels scroll at container level (like #root-scroll-wrapper in Overworld)
-   - Cards expand to natural height without flex constraints
-   - Lists have intentional scroll at 600px for space efficiency
-   - Each panel only reserves space for its actual navigation buttons */
 #cloudsPanel, #undergroundPanel {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -383,15 +386,11 @@ input:focus { outline: none; border-color: var(--mario-green); }
   overflow-x: hidden;
 }
 
-/* Clouds: Only cloud button at bottom (return to overworld) */
 #cloudsPanel {
-  /* Uses global spacing variable directly */
   padding: var(--topbar-height) 24px var(--cloud-btn-space);
 }
 
-/* Underground: Pipe button at top (return to overworld) */
 #undergroundPanel {
-  /* Uses global spacing variable directly */
   padding: calc(var(--topbar-height) + var(--pipe-btn-space)) 24px 40px;
 }
 
@@ -420,7 +419,6 @@ input:focus { outline: none; border-color: var(--mario-green); }
   align-items: stretch;
 }
 
-/* Shared list section structure */
 .clouds-projects,
 .skills-list-section {
   display: flex;
@@ -428,7 +426,6 @@ input:focus { outline: none; border-color: var(--mario-green); }
   gap: 8px;
 }
 
-/* Shared scrollable list pattern - intentional scroll for long lists */
 #cloudProjectsList,
 #undergroundSkillsList {
   list-style: none;
@@ -441,7 +438,6 @@ input:focus { outline: none; border-color: var(--mario-green); }
   margin: 0;
 }
 
-/* Shared list item styles for consistency */
 #cloudProjectsList li,
 #undergroundSkillsList li {
   padding: 10px 12px;
@@ -454,7 +450,6 @@ input:focus { outline: none; border-color: var(--mario-green); }
 
 #cloudProjectsList li:hover { background: rgba(255,255,255,0.03); }
 
-/* Shared graph container structure */
 .clouds-graph,
 .skills-graphs-section {
   display: flex;
@@ -503,7 +498,6 @@ input:focus { outline: none; border-color: var(--mario-green); }
   border-bottom: none;
 }
 
-/* Floating Navigation Buttons - Fixed positioning with reserved space */
 .nav-btn {
   position: fixed;
   left: 50%;
@@ -619,8 +613,6 @@ body.area-overworld { --bg-image: url("images/overworld.png"); }
 body.area-clouds { --bg-image: url("images/clouds.png"); }
 body.area-underground { --bg-image: url("images/underground.png"); }
 
-/* Transition overlay effects */
-/* Cloud transition: upward movement with soft cloud overlay */
 body.transitioning-to-clouds #root-scroll-wrapper::before {
   background: linear-gradient(to bottom, 
     rgba(92, 148, 252, 0) 0%,
@@ -632,7 +624,6 @@ body.transitioning-to-clouds #root-scroll-wrapper::before {
   animation: cloudPass 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Pipe transition: downward movement with darkening effect */
 body.transitioning-to-underground #root-scroll-wrapper::before {
   background: radial-gradient(ellipse at center,
     rgba(10, 12, 24, 0) 0%,
@@ -655,7 +646,6 @@ body.transitioning-to-underground #root-scroll-wrapper::before {
   100% { transform: scale(3) translateY(100%); opacity: 0; }
 }
 
-/* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   body::after {
     animation: none !important;
@@ -768,7 +758,6 @@ body.area-underground #undergroundPanel { opacity: 1; pointer-events: auto; tran
   #cloudsPanel .card-inner { grid-template-columns: 1fr; }
   #undergroundPanel .card-inner { grid-template-columns: 1fr; }
   
-  /* Consistent mobile order: graphs first, lists second */
   .clouds-graph { order: -1; }
   .skills-graphs-section { order: -1; }
   
@@ -810,7 +799,6 @@ body.area-underground #undergroundPanel { opacity: 1; pointer-events: auto; tran
   .stat-row svg { height: 220px; }
   #projectsTimeline { height: 200px; }
   
-  /* Mobile: each panel only reserves space for its actual button */
   #cloudsPanel { 
     padding: var(--topbar-height) 12px calc(var(--cloud-btn-space) + 50px);
   }
