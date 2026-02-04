@@ -1,4 +1,4 @@
-import { TOKEN_KEY } from './authManager.js';
+import { TOKEN_KEY, clearAuthAndRedirect } from './authManager.js';
 
 const GRAPHQL_ENDPOINT = "https://learn.reboot01.com/api/graphql-engine/v1/graphql";
 
@@ -24,9 +24,7 @@ export async function graphqlRequest(query, variables = {}) {
 
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem("lastArea");
-      location.replace("index.html");
+      clearAuthAndRedirect();
       throw new Error("Session expired. Please login again.");
     }
     
@@ -43,9 +41,7 @@ export async function graphqlRequest(query, variables = {}) {
     );
     
     if (authError) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem("lastArea");
-      location.replace("index.html");
+      clearAuthAndRedirect();
     }
     
     throw new Error(data.errors.map(e => e.message).join("; "));

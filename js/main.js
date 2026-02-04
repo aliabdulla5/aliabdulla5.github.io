@@ -1,7 +1,9 @@
-import { setupAuthMonitoring, handleLogin, logout } from './modules/authManager.js';
+import { setupAuthMonitoring, handleLogin, logout, isAuthenticated } from './modules/authManager.js';
 import { initProfile } from './modules/profileApp.js';
 
 function initApp() {
+  setupAuthMonitoring();
+  
   const isLoginPage = location.pathname.includes("index.html") || 
                       location.pathname.endsWith("/") || 
                       location.pathname === "";
@@ -15,6 +17,11 @@ function initApp() {
 }
 
 function initLoginPage() {
+  if (isAuthenticated()) {
+    location.replace("profile.html");
+    return;
+  }
+  
   const form = document.getElementById("loginForm");
   if (!form) return;
 
@@ -50,8 +57,6 @@ function initLoginPage() {
 }
 
 function initProfilePage() {
-  setupAuthMonitoring();
-
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       initProfile();

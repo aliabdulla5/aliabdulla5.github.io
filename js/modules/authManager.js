@@ -1,8 +1,12 @@
 export const DOMAIN = "https://learn.reboot01.com";
 export const TOKEN_KEY = "jwt";
 
-export function isTokenValid() {
-  const token = localStorage.getItem(TOKEN_KEY);
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function isAuthenticated() {
+  const token = getToken();
   if (!token) return false;
   
   try {
@@ -12,11 +16,13 @@ export function isTokenValid() {
     const payload = JSON.parse(atob(parts[1]));
     
     if (payload.exp && payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem(TOKEN_KEY);
       return false;
     }
     
     return true;
   } catch (e) {
+    localStorage.removeItem(TOKEN_KEY);
     return false;
   }
 }
@@ -24,35 +30,20 @@ export function isTokenValid() {
 export function clearAuthAndRedirect() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem("lastArea");
+  sessionStorage.clear();
   location.replace("index.html");
 }
 
 export function enforceAuth() {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (!token) {
-    location.replace("index.html");
-    return false;
-  }
-  
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) throw new Error("Invalid token");
-    
-    const payload = JSON.parse(atob(parts[1]));
-    if (payload.exp && payload.exp * 1000 < Date.now()) {
-      clearAuthAndRedirect();
-      return false;
-    }
-  } catch (e) {
+  if (!isAuthenticated()) {
     clearAuthAndRedirect();
     return false;
   }
-  
   return true;
 }
 
 export function getUserIdFromToken() {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = getToken();
   if (!token) return null;
   
   try {
@@ -94,26 +85,33 @@ export async function handleLogin(identifier, password) {
 export function logout() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem("lastArea");
+  sessionStorage.clear();
   location.replace("index.html");
 }
 
 export function setupAuthMonitoring() {
-  if (!location.pathname.includes("profile")) return;
+  const isLoginPage = location.pathname.includes("index.html") || 
+                      location.pathname.endsWith("/") || 
+                      location.pathname === "";
+  const isProfilePage = location.pathname.includes("profile");
   
-  if (!isTokenValid()) {
-    clearAuthAndRedirect();
-    throw new Error("Unauthorized");
-  }
-
   window.addEventListener("pageshow", (event) => {
-    if (event.persisted && !isTokenValid()) {
-      clearAuthAndRedirect();
+    if (event.persisted) {
+      if (isProfilePage && !isAuthenticated()) {
+        clearAuthAndRedirect();
+      } else if (isLoginPage && isAuthenticated()) {
+        location.replace("profile.html");
+      }
     }
   });
   
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && !isTokenValid()) {
-      clearAuthAndRedirect();
+    if (!document.hidden) {
+      if (isProfilePage && !isAuthenticated()) {
+        clearAuthAndRedirect();
+      } else if (isLoginPage && isAuthenticated()) {
+        location.replace("profile.html");
+      }
     }
   });
 }
