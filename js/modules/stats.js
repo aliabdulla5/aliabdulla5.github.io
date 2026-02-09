@@ -5,8 +5,8 @@ export function processStats(user, transactions, levelTx) {
   
   let level = 1;
   if (levelTx.length) {
-    const maxLevel = Math.max(...levelTx.map(t => Number(t.amount) || 0));
-    level = Math.max(1, maxLevel - 1);
+    const currentLevel = Number(levelTx[0].amount) || 0;
+    level = Math.max(1, currentLevel);
   } else {
     level = Math.max(1, Math.floor(totalXP / 1000));
   }

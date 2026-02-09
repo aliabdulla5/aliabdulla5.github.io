@@ -89,12 +89,18 @@ export async function fetchXPTransactions(uid) {
 
 export async function fetchLevelTransactions(uid) {
   const query = `query($uid: Int!) {
-    transaction(where: { userId: { _eq: $uid }, type: { _eq: "level" } }, order_by: { createdAt: asc }) {
-      amount createdAt
+    transaction(where: { userId: { _eq: $uid }, type: { _eq: "level" } }, order_by: { createdAt: desc }) {
+      amount createdAt path
     }
   }`;
   const res = await graphqlRequest(query, { uid });
-  return res.data?.transaction || [];
+  const transactions = res.data?.transaction || [];
+  return transactions.filter(t => {
+    const path = (t.path || "").toLowerCase();
+    const piscineIdx = path.indexOf("piscine");
+    if (piscineIdx === -1) return true;
+    return path.indexOf("/", piscineIdx + 7) === -1;
+  });
 }
 
 export async function fetchProgresses(uid) {
